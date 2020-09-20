@@ -1,14 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
-const userSchema = new mongoose.Schema({
-  id: mongoose.Schema.Types.ObjectId,
+const Schema = mongoose.Schema
+
+const userSchema = new Schema({
   fullname: {
     type: String,
     require: false
   },
   email: {
     type: String,
-    require: false
+    require: true
   },
   nickName: {
     type: String,
@@ -30,10 +31,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     require: false
   },
-  isChatActive: {
-    type: Boolean,
-    require: true
+  purchsedBooks: {
+    type: Array,
+    require: false
   }
-});
+})
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('users', userSchema)

@@ -1,20 +1,15 @@
-import React from "react";
-import ProductManagement from "./ProductManagement";
-const AdminPanel = ({
-  updateProduct,
-  showUpdateProduct,
-  showAddProduct,
-  addProduct
-}) => {
+import React from 'react'
+import ProductManagement from './ProductManagement'
+const AdminPanel = ({ updateBook, showUpdateBook, showAddBook, addBook }) => {
   return (
-    <section className="adminPanel">
+    <section className='adminPanel'>
       <ProductManagement
-        addProduct={addProduct}
-        updateProduct={updateProduct}
-        showUpdateProduct={showUpdateProduct}
-        showAddProduct={showAddProduct}
+        addBook={addBook}
+        updateBook={updateBook}
+        showUpdateBook={showUpdateBook}
+        showAddBook={showAddBook}
       />
     </section>
-  );
-};
-export default AdminPanel;
+  )
+}
+export default AdminPanel

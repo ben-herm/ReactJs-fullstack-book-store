@@ -1,6 +1,6 @@
 {
-   "short_name": "OldTown",
-   "name": "OldTown Bookstore",
+   "short_name": "BookStore Exercise",
+   "name": "Bookstore",
    "icons": [
       {
          "src": "favicon.png",

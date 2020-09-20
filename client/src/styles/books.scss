@@ -1,0 +1,65 @@
+.showBooks {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 15px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+.book-Cart {
+  padding: 10px;
+  @include txtCtr;
+  border-radius: 5px;
+
+  h2,
+  h3 {
+    font-family: "Poppins";
+  }
+  h2 {
+    font-size: 20px;
+  }
+  h3 {
+    font-size: 16px;
+    margin-bottom: 7px;
+  }
+  .img-book {
+    width: 300px;
+    height: 200px;
+    margin: 0 auto;
+    position: relative;
+    img {
+      width: 100%;
+    }
+    span {
+      position: absolute;
+      bottom: 8.5%;
+      background-color: rgba(255, 255, 255, 0.5);
+      right: 0;
+      font-size: 13px;
+      font-family: "Poppins", sans-serif;
+      font-weight: 700;
+      padding: 2px 5px 3px 5px;
+      border: 1px solid #000;
+    }
+  }
+  .addBasket {
+    h4 {
+      font-size: 19px;
+      font-family: "Poppins";
+      margin-bottom: 8px;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .showBooks {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .book-Cart {
+    .addBasket {
+      padding: 0 10px px 0;
+      h4 {
+        font-size: 21px;
+      }
+    }
+  }
+}

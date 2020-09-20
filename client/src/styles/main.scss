@@ -7,6 +7,7 @@
   box-sizing: border-box;
 }
 .wrapper {
+
   padding: 70px 3% 0;
 }
 a {
@@ -60,13 +61,13 @@ img {
   text-align: center;
   z-index: 70;
   .nav-page {
-    background-color: rgba(0, 0, 0, 0.8);
+
     border-radius: 10px;
     padding: 20px;
     width: 80%;
     h1 {
       font-size: 22px;
-      color: #fcfcfc;
+      color:black;
       text-transform: uppercase;
     }
     .welcome-btn {
@@ -74,7 +75,7 @@ img {
       margin-top: 15px;
       border: 1px solid $bgc-item;
       background-color: transparent;
-      color: #fff;
+      color: black;
       font-weight: 700;
       border-radius: 6px;
       font-size: 20px;
@@ -99,6 +100,7 @@ footer {
 }
 @media (min-width: 768px) {
   .wrapper {
+
     padding: 80px 3% 0;
   }
   .notFound {
@@ -112,7 +114,8 @@ footer {
 
   .enterPage {
     .nav-page {
-      background-color: rgba(0, 0, 0, 0.7);
+      position: absolute;
+      top:0;
       padding: 30px;
       width: 70%;
       h1 {

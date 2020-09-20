@@ -1,93 +1,155 @@
-const router = require("express").Router();
-const UserSchema = require("../schemes/userSchema");
-const Chat = require("../schemes/chatSchema");
-const mongoose = require("mongoose");
-const { registerSchema, loginValSchema, updateSchema } = require("../schemes/validationSchema");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const verify = require("../middleware/auth");
-router.delete("/deleteMessage/:id", async (req, res) => {
-  const { id } = req.params;
-  Chat.updateOne({ "chat.id": mongoose.Types.ObjectId(id) }, { $pull: { chat: { id: mongoose.Types.ObjectId(id) } } }, { multi: true }, err => {
-    if (err) console.log(err);
-  });
-  res.status(200).json("Message deleted");
-});
-router.get("/getChatUser", verify, async (req, res) => {
-  const user = await UserSchema.find().select("-password -phone -registerDate -email -fullname");
-  res.status(200).json(user);
-});
-router.post("/getChatTalk/", async (req, res) => {
-  const { userID, data } = req.body;
-  const findChat = await Chat.findOne({ usersID: { $all: [userID, data] } });
-  if (findChat) res.status(200).json(findChat.chat);
-  else res.status(404).json("Not found");
-});
-router.post("/sendMessage", verify, async (req, res) => {
-  const ObjectID = require("mongodb").ObjectID;
-  const { Ids, chatMessage, from, time } = req.body;
-  const findChat = await Chat.findOne({ usersID: { $all: Ids } });
-  const data = {
-    from,
-    message: chatMessage,
-    time,
-    id: new ObjectID()
-  };
-  if (findChat) {
-    const updateChat = await Chat.findOneAndUpdate({ usersID: { $all: Ids } }, { $addToSet: { chat: data } }, { new: true }, (err, data) => {
-      if (err) return res.status(404).json("Not found");
-      return res.status(200).json(data.chat);
-    });
-  } else {
-    const newChat = new Chat({
-      usersID: Ids,
-      chat: [{ from, message: chatMessage, time, id: new ObjectID() }]
-    });
-    try {
-      const createChat = await newChat.save();
-      res.status(200).json(createChat.chat);
-    } catch (err) {
-      res.status(400).json("Error");
+const router = require('express').Router()
+let UserSchema = require('../schemes/userSchema')
+const mongoose = require('mongoose')
+const validator = require('validator')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const verify = require('../middleware/auth')
+
+router.put('/addPurchsedBooks:id', verify, (req, res) => {
+  const { id } = req.params
+
+  const data = req.body
+  let newData
+  const validationErrors = []
+  if (validationErrors.length) {
+    return res.status(400).json({ errors: validationErrors })
+  }
+
+  UserSchema.findOne({ _id: id }).then(user => {
+    if (!user)
+      return res.status(400).json('There was a problem with the request.')
+
+    newData = user.purchsedBooks
+    data.forEach(purchase => {
+      newData.push(purchase)
+    })
+    let dataFinal = { purchsedBooks: newData }
+    UserSchema.updateOne({ _id: id }, dataFinal, err => {
+      if (err) return res.status(404).json('Not Found')
+      res.status(200).json('Thank You For Purchasing!')
+    })
+  })
+})
+router.post('/register', (req, res) => {
+  const { fullname, email, nickName, password, phone, registerDate } = req.body
+  const validationErrors = []
+
+  UserSchema.findOne({ email }).then(user => {
+    if (user) {
+      return res.status(400).json('User already exists')
     }
+
+    if (!validator.isEmail(email)) {
+      validationErrors.push({
+        emailError: 'Please enter a valid email address.'
+      })
+    }
+
+    if (validator.isEmpty(fullname)) {
+      validationErrors.push({
+        nameError: 'Please enter a userName'
+      })
+    } else if (!validator.isLength(fullname, { min: 5 })) {
+      validationErrors.push({
+        nameError: 'Full Name must be at least 5 characters long'
+      })
+    }
+
+    if (!validator.isLength(password, { min: 8 })) {
+      validationErrors.push({
+        passwordError: 'Password must be at least 8 characters long'
+      })
+    }
+
+    if (validationErrors.length) {
+      return res.status(400).json({ errors: validationErrors })
+      //  res.redirect('/login')
+    }
+
+    const newUser = new UserSchema({
+      fullname,
+      email,
+      nickName,
+      password,
+      phone,
+      registerDate,
+      purchsedBooks: []
+    })
+
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(newUser.password, salt, (err, hash) => {
+        if (err) throw err
+        newUser.password = hash
+        newUser
+          .save()
+          .then(activeUser => {
+            jwt.sign(
+              { _id: activeUser._id },
+              process.env.JWT_TOKEN,
+              {
+                expiresIn: 3600
+              },
+              (err, token) => {
+                if (err) throw err
+                res.json({
+                  token,
+                  id: activeUser._id,
+                  user: {
+                    userID: activeUser._id,
+                    fullname: activeUser.fullname,
+                    nickName: activeUser.nickName,
+                    phone: activeUser.phone,
+                    email: activeUser.email,
+                    registerDate: activeUser.registerDate,
+                    purchsedBooks: activeUser.purchsedBooks
+                  }
+                })
+              }
+            )
+          })
+          .catch(err => {
+            if (err) {
+              return res.status(400).json({
+                msg:
+                  'The registration could not be completed, please try again later.'
+              })
+            }
+          })
+      })
+    })
+  })
+})
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+  const validationErrors = []
+  // if (error) return res.status(400).json(error.details[0].message)
+
+  if (!validator.isEmail(email)) {
+    validationErrors.push({
+      emailError: 'Please enter a valid email address.'
+    })
   }
-});
 
-router.post("/register", async (req, res) => {
-  const { fullname, email, nickName, password, phone, registerDate } = req.body;
-  const { error } = registerSchema(req.body);
-  if (error) return res.status(400).json(error.details[0].message);
-  const checkIfEmailIsExist = await UserSchema.findOne({ email });
-  if (checkIfEmailIsExist) return res.status(401).json("Email already exist");
-
-  const salt = await bcrypt.genSalt(10);
-  const hashedPass = await bcrypt.hash(password, salt);
-
-  const newUser = new UserSchema({
-    fullname,
-    email,
-    nickName,
-    password: hashedPass,
-    phone,
-    registerDate
-  });
-  try {
-    const createdUser = await newUser.save();
-    res.status(200).json("your account has been successfully created");
-  } catch (err) {
-    res.status(400).json(err);
+  if (!validator.isLength(password, { min: 8 })) {
+    validationErrors.push({
+      passwordError: 'Password must be at least 8 characters long'
+    })
   }
-});
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const { error } = loginValSchema(req.body);
-  if (error) return res.status(400).json(error.details[0].message);
-  const user = await UserSchema.findOne({ email });
-  if (!user) return res.status(400).json("Wrong email or password");
-  const comparePass = await bcrypt.compare(password, user.password);
-  if (!comparePass) return res.status(400).json("Wrong email or password");
-  const token = jwt.sign({ _id: user._id }, process.env.USER_TOKEN, {
-    expiresIn: 20000
-  });
+
+  if (validationErrors.length) {
+    return res.status(400).json({ errors: validationErrors })
+  }
+
+  const user = await UserSchema.findOne({ email })
+
+  if (!user) return res.status(400).json('User Does Not Exist')
+
+  const comparePass = await bcrypt.compare(password, user.password)
+  if (!comparePass) return res.status(400).json('Wrong email or password')
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_TOKEN, {
+    expiresIn: 3600
+  })
   res.json({
     token,
     id: user._id,
@@ -99,52 +161,76 @@ router.post("/login", async (req, res) => {
       phone: user.phone,
       registerDate: user.registerDate,
       isAdmin: user.isAdmin,
-      isChatActive: user.isChatActive
+      purchsedBooks: user.purchsedBooks
     }
-  });
-});
-router.get("/:id", verify, (req, res) => {
-  const { id } = req.params;
+  })
+})
+router.get('/:id', verify, (req, res) => {
+  const { id } = req.params
   UserSchema.findById(id, (err, data) => {
-    if (err) res.status(404);
-    else res.json(data);
-  }).select("-password");
-});
-router.put("/:id", verify, async (req, res) => {
-  const { id } = req.params;
-  const { password, newPassword } = req.body;
-  if (!password) return res.json("You need to enter your password");
-  const { error } = updateSchema(req.body);
-  if (error) return res.status(400).json(error.details[0].message);
-  const user = await UserSchema.findOne({ _id: id });
-  const comparePass = await bcrypt.compare(password, user.password);
-  if (!comparePass) return res.status(400).json("Wrong password");
-  let data = req.body;
-  if (data["newPassword"]) {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPass = await bcrypt.hash(newPassword, salt);
-    data["password"] = hashedPass;
-    delete data["newPassword"];
-  } else {
-    delete data[("newPassword", "password")];
+    if (err) res.status(404)
+    else res.json(data)
+  }).select('-password')
+})
+router.put('/:id', verify, async (req, res) => {
+  const { id } = req.params
+  let data = req.body
+  const { password } = req.body
+  const validationErrors = []
+  // if (error) return res.status(400).json(error.details[0].message)
+
+  if (!validator.isEmail(data.email)) {
+    validationErrors.push({
+      emailError: 'Please enter a valid email address.'
+    })
+  }
+
+  if (validator.isEmpty(data.fullname)) {
+    validationErrors.push({
+      nameError: 'Please enter a userName'
+    })
+  } else if (!validator.isLength(data.fullname, { min: 5 })) {
+    validationErrors.push({
+      nameError: 'Full Name must be at least 5 characters long'
+    })
+  }
+
+  if (!validator.isLength(data.password, { min: 8 })) {
+    validationErrors.push({
+      passwordError: 'Password must be at least 8 characters long'
+    })
+  }
+
+  if (validationErrors.length) {
+    return res.status(400).json({ errors: validationErrors })
+  }
+
+  const user = await UserSchema.findOne({ _id: id })
+  if (!user)
+    return res.status(400).json('There was a problem with the request.')
+
+  if (data['password']) {
+    const salt = await bcrypt.genSalt(10)
+    const hashedPass = await bcrypt.hash(data.password, salt)
+    data['password'] = hashedPass
   }
 
   Object.entries(data).forEach(([key, value]) => {
-    if (!value) delete data[key];
-  });
+    if (!value) delete data[key]
+  })
   UserSchema.updateOne({ _id: id }, data, err => {
-    if (err) return res.status(404).json("Not Found");
-    res.status(200).json("Your data has been updated");
-  });
-});
-router.delete("/delete/:id", async (req, res) => {
-  const { id } = req.params;
+    if (err) return res.status(404).json('Not Found')
+    res.status(200).json('Your data has been updated')
+  })
+})
+router.delete('/delete/:id', async (req, res) => {
+  const { id } = req.params
   try {
-    await UserSchema.deleteOne({ _id: id });
-    res.status(200).json("Account deleted");
+    await UserSchema.deleteOne({ _id: id })
+    res.status(200).json('Account deleted')
   } catch (err) {
-    res.status(404).json("Something went wrong");
+    res.status(404).json('Something went wrong')
   }
-});
+})
 
-module.exports = router;
+module.exports = router

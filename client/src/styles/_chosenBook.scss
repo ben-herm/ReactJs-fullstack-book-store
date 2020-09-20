@@ -49,8 +49,12 @@
     grid-template-rows: repeat(12, 1fr);
     height: calc(100vh - 80px);
     .header {
-      grid-column: 1/12;
-      grid-row: 1/2;
+      grid-column: 4/12;
+      grid-row: 1;
+    }
+    .descrip {
+      grid-column: 5.5/12;
+      grid-row: 2;
     }
     .bookCover {
       grid-column: 1/6;

@@ -1,0 +1,167 @@
+.adminPanel {
+  padding: 10px;
+  h4 {
+    font-size: 20px;
+  }
+  .editBook {
+    p {
+      margin: 5px 0;
+      font-size: 15px;
+      color: #e0f8fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+  }
+  .btn-add-book {
+    margin: 14px;
+    padding: 7px 13px;
+    font-size: 14px;
+  }
+  .productManagement {
+    margin-bottom: 10px;
+  }
+  .bookFromDB {
+    margin: 10px 0;
+    display: block;
+    padding: 10px;
+    border: 1px dashed black;
+    font-family: "Poppins";
+    h4 {
+      font-size: 15px;
+    }
+    button {
+      margin: 10px 6px;
+      padding: 5px 15px;
+      border: 1px solid black;
+      font-size: 14px;
+      border-radius: 3px;
+      &:first-child {
+        background-color: #0a993a;
+        color: #fff;
+      }
+      &:nth-child(2) {
+        background-color: #c71d1d;
+        color: #fff;
+      }
+    }
+  }
+}
+.logoutInfo {
+  color: #c71d1d;
+}
+.close {
+  width: 50px;
+  font-size: 25px;
+  color: white;
+  font-weight: 700;
+  position: absolute;
+  text-align: center;
+  right: 5%;
+  top: 3%;
+  cursor: pointer;
+}
+
+.cms-form {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: black;
+  padding: 20px 10px;
+  border-radius: 5px;
+  label {
+    margin: 5px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: "Poppins";
+    color: #def0f8;
+  }
+  a {
+    color: #fca1a1;
+    font-size: 15px;
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+    margin-bottom: 10px;
+    width: 45%;
+  }
+  input,
+  textarea {
+    border: 2px solid $darkRed;
+    padding: 6px;
+    font-size: 18px;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
+    border-radius: 6px;
+    &::placeholder {
+      color: #1f1b1b;
+      font-size: 18px;
+      font-style: italic;
+    }
+  }
+  input[type="file"] {
+    font-size: 14px;
+  }
+  .cms-button {
+    width: 100%;
+    margin-top: 20px;
+    font-size: 18px;
+    border: 1px solid $darkRed;
+    border-radius: 5px;
+    padding: 7px 0;
+    font-weight: 700;
+    background-color: #d7eaf3;
+  }
+}
+@media (min-width: 480px) {
+  .adminPanel .bookFromDB {
+    padding: 15px 100px;
+  }
+  .adminPanel .bookFromDB h4 {
+    font-size: 18px;
+  }
+}
+@media (min-width: 768px) {
+  .adminPanel {
+    .btn-add-book {
+      padding: 8px 14px;
+      font-size: 15px;
+    }
+    .productManagement {
+      padding: 8px 10px;
+    }
+    .bookFromDB {
+      padding: 15px 80px;
+      h4 {
+        font-size: 22px;
+      }
+      .buttons-cms-event {
+        margin-top: 15px;
+      }
+      button {
+        padding: 7px 30px;
+        font-size: 16px;
+      }
+    }
+  }
+  .cms-form {
+    width: 50%;
+    padding: 30px 40px;
+    margin: 20px auto;
+    top: 6%;
+    left: 0;
+    label {
+      font-size: 20px;
+      text-align: left;
+    }
+    a {
+      font-size: 18px;
+    }
+    input,
+    textarea {
+      font-size: 21px;
+    }
+    .cms-button {
+      width: 30%;
+    }
+    input[type="file"] {
+      font-size: 19px;
+    }
+  }
+}

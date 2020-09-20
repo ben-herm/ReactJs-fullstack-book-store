@@ -1,46 +1,60 @@
-import React from "react";
-import { StoreConsumer } from "./Store";
-import EditModal from "./editModal";
-import AddNewProductToADB from "./AddNewProductToADB";
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  showInfo,
+  closeInfo,
+  setBookId,
+  setBooks
+} from '../Components/redux/actions/booksActions'
+import EditModal from './editModal'
+import AddNewBook from './AddNewBook'
+import { deleteBook, getData } from '../api/booksApi'
 
 const ProductManagement = ({
-  showUpdateProduct,
-  showAddProduct,
-  addProduct,
-  updateProduct
+  showUpdateBook,
+  showAddBook,
+  addBook,
+  updateBook
 }) => {
-  const { booksData, deleteBookFromDB, getThisBookFromDB } = React.useContext(
-    StoreConsumer
-  );
+  const dispatch = useDispatch()
+  const { booksData } = useSelector(state => state.BooksReducer)
   const displayBooks = booksData.map(item => (
-    <div key={item._id} className="bookFromDB">
+    <div key={item._id} className='bookFromDB'>
       <h4>Author: {item.author}</h4> <h4> Title: {item.title}</h4>
-      <div className="buttons-cms-event">
+      <div className='buttons-cms-event'>
         <button
           onClick={() => {
-            showUpdateProduct(true);
-            getThisBookFromDB(item._id);
+            showUpdateBook(true)
+            dispatch(setBookId(item._id))
           }}
         >
           Update
         </button>
-        <button onClick={() => deleteBookFromDB(item._id, item.cover)}>
+        <button
+          onClick={() =>
+            deleteBook(item._id, item.cover).then(() => {
+              getData().then(books => {
+                dispatch(setBooks(books))
+              })
+            })
+          }
+        >
           Delete
         </button>
       </div>
     </div>
-  ));
+  ))
   return (
     <>
-      <EditModal showUpdateProduct={showUpdateProduct} value={updateProduct} />
-      {!updateProduct && (
-        <div className="productManagement">
+      <EditModal showUpdateBook={showUpdateBook} value={updateBook} />
+      {!updateBook && (
+        <div className='productManagement'>
           <h3>There are {booksData.length} book(s) in the database</h3>
           {displayBooks}
         </div>
       )}
-      <AddNewProductToADB value={addProduct} showAddProduct={showAddProduct} />
+      <AddNewBook value={addBook} showAddBook={showAddBook} />
     </>
-  );
-};
-export default ProductManagement;
+  )
+}
+export default ProductManagement
