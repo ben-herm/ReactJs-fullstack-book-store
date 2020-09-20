@@ -1,7 +1,6 @@
 // @flow
 
 import * as types from '../actions/types'
-import { Types } from 'mongoose'
 
 const INITIAL_STATE = {
   token: null,
