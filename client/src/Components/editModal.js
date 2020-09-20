@@ -11,17 +11,7 @@ import { editBookInDB, getData } from '../api/booksApi'
 import { Link } from 'react-router-dom'
 
 const EditModal = ({ showUpdateBook, value }) => {
-  const {
-    title,
-    author,
-    desc,
-    pages,
-    print,
-    price,
-    date,
-    booksData,
-    bookID
-  } = useSelector(state => state.BooksReducer)
+  const { booksData, bookID } = useSelector(state => state.BooksReducer)
   const dispatch = useDispatch()
   const [data, setBookData] = useState({
     title: '',
