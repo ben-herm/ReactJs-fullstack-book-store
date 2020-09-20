@@ -29,7 +29,7 @@ const EditModal = ({ showUpdateBook, value }) => {
     const newDataFinal = { ...newData }
     const New = { ...newDataFinal[0] }
     setBookData(New)
-  }, [bookID])
+  }, [bookID, booksData])
 
   const handleCmsValue = e => {
     const name = e.target.name
